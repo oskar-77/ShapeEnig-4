@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 0%;
+  --foreground: 180 100% 97%;
+  
+  --primary: 168 100% 50%; /* Cyan #00ffcc */
+  --primary-foreground: 0 0% 0%;
+  
+  --secondary: 336 100% 50%; /* Pink #ff0066 */
+  --secondary-foreground: 0 0% 100%;
+  
+  --accent: 268 100% 50%; /* Purple #7700ff */
+  --accent-foreground: 0 0% 100%;
+  
+  --muted: 215 25% 15%;
+  --muted-foreground: 215 20% 65%;
+  
+  --card: 222 47% 4%;
+  --card-foreground: 210 40% 98%;
+  
+  --border: 168 100% 20%;
+  --input: 215 25% 15%;
+  --ring: 168 100% 50%;
+  
+  --radius: 0.75rem;
+  
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-black text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground overflow-hidden;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply tracking-wider;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-black/40 backdrop-blur-md border border-primary/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)];
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5), 0 0 20px rgba(0, 255, 204, 0.3);
+  }
+  
+  .neon-border {
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.2), inset 0 0 10px rgba(0, 255, 204, 0.1);
+  }
+}
+
+/* Custom Scrollbar for the glass look */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 204, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 204, 0.6);
+}
