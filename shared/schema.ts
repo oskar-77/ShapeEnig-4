@@ -1,26 +1,27 @@
-import { pgTable, text, serial, boolean, timestamp, real } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // === TABLE DEFINITIONS ===
-export const templates = pgTable("templates", {
-  id: serial("id").primaryKey(),
+export const templates = sqliteTable("templates", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   imageUrl: text("image_url").notNull(), 
-  isCustom: boolean("is_custom").default(false),
+  isCustom: integer("is_custom", { mode: 'boolean' }).default(false),
   displayText: text("display_text"), // For on-screen text
   primaryColor: text("primary_color").default("#00ffcc"), // Cyan default
   secondaryColor: text("secondary_color").default("#ff0066"), // Pink default
   scale: real("scale").default(1.0), // For zooming in/out
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const shapeDescriptions = pgTable("shape_descriptions", {
-  id: serial("id").primaryKey(),
+export const shapeDescriptions = sqliteTable("shape_descriptions", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   shapeId: text("shape_id").notNull().unique(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).default(sql`CURRENT_TIMESTAMP`),
 });
 
 // === BASE SCHEMAS ===

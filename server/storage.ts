@@ -21,54 +21,60 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getTemplates(): Promise<Template[]> {
-    return await db.select().from(templates).orderBy(templates.createdAt);
+    return db.select().from(templates).all();
   }
 
   async createTemplate(insertTemplate: InsertTemplate): Promise<Template> {
-    const [template] = await db
+    const result = db
       .insert(templates)
       .values(insertTemplate)
-      .returning();
-    return template;
+      .returning()
+      .get();
+    if (!result) throw new Error("Failed to create template");
+    return result;
   }
 
   async updateTemplate(id: number, updates: Partial<InsertTemplate>): Promise<Template> {
-    const [updated] = await db
+    const updated = db
       .update(templates)
       .set(updates)
       .where(eq(templates.id, id))
-      .returning();
+      .returning()
+      .get();
     if (!updated) throw new Error("Template not found");
     return updated;
   }
 
   async deleteTemplate(id: number): Promise<void> {
-    await db.delete(templates).where(eq(templates.id, id));
+    db.delete(templates).where(eq(templates.id, id)).run();
   }
 
   async getShapeDescriptions(): Promise<ShapeDescription[]> {
-    return await db.select().from(shapeDescriptions);
+    return db.select().from(shapeDescriptions).all();
   }
 
   async getShapeDescription(shapeId: string): Promise<ShapeDescription | undefined> {
-    const result = await db.select().from(shapeDescriptions).where(eq(shapeDescriptions.shapeId, shapeId));
-    return result[0];
+    return db.select().from(shapeDescriptions).where(eq(shapeDescriptions.shapeId, shapeId)).get();
   }
 
   async upsertShapeDescription(desc: InsertShapeDescription): Promise<ShapeDescription> {
     const existing = await this.getShapeDescription(desc.shapeId);
     if (existing) {
-      const [updated] = await db
+      const updated = db
         .update(shapeDescriptions)
         .set({ title: desc.title, description: desc.description, updatedAt: new Date() })
         .where(eq(shapeDescriptions.shapeId, desc.shapeId))
-        .returning();
+        .returning()
+        .get();
+      if (!updated) throw new Error("Failed to update shape description");
       return updated;
     } else {
-      const [inserted] = await db
+      const inserted = db
         .insert(shapeDescriptions)
         .values(desc)
-        .returning();
+        .returning()
+        .get();
+      if (!inserted) throw new Error("Failed to insert shape description");
       return inserted;
     }
   }
