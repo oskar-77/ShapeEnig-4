@@ -8,6 +8,20 @@ import { helix } from "../lib/shapes/helix";
 import { heart } from "../lib/shapes/heart";
 import { pyramid } from "../lib/shapes/pyramid";
 import { cylinder } from "../lib/shapes/cylinder";
+import { galaxy } from "../lib/shapes/galaxy";
+import { fountain } from "../lib/shapes/fountain";
+import { vortex } from "../lib/shapes/vortex";
+import { nebula } from "../lib/shapes/nebula";
+import { octahedron } from "../lib/shapes/octahedron";
+import { icosahedron } from "../lib/shapes/icosahedron";
+import { mobius } from "../lib/shapes/mobius";
+import { cone } from "../lib/shapes/cone";
+import { starburst } from "../lib/shapes/starburst";
+import { barchart } from "../lib/shapes/barchart";
+import { bezier } from "../lib/shapes/bezier";
+import { layers } from "../lib/shapes/layers";
+import { network } from "../lib/shapes/network";
+import { rings } from "../lib/shapes/rings";
 
 interface ParticleViewerProps {
   mode: string;
@@ -66,15 +80,34 @@ export function ParticleViewer({ mode, customImageData }: ParticleViewerProps) {
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const i3 = i * 3;
       let p;
-      switch (currentMode) {
+      const m = currentMode.toLowerCase().replace(/\s/g, '');
+      switch (m) {
         case 'sphere': p = sphere(i, PARTICLE_COUNT); break;
         case 'cube': p = cube(i, PARTICLE_COUNT); break;
         case 'line': p = line(i, PARTICLE_COUNT); break;
         case 'torus': p = torus(i, PARTICLE_COUNT); break;
+        case 'doublehelix':
         case 'helix': p = helix(i, PARTICLE_COUNT); break;
         case 'heart': p = heart(i, PARTICLE_COUNT); break;
         case 'pyramid': p = pyramid(i, PARTICLE_COUNT); break;
         case 'cylinder': p = cylinder(i, PARTICLE_COUNT); break;
+        case 'galaxy': p = galaxy(i, PARTICLE_COUNT); break;
+        case 'fountain': p = fountain(i, PARTICLE_COUNT); break;
+        case 'vortex': p = vortex(i, PARTICLE_COUNT); break;
+        case 'nebula': p = nebula(i, PARTICLE_COUNT); break;
+        case 'octahedron': p = octahedron(i, PARTICLE_COUNT); break;
+        case 'icosahedron': p = icosahedron(i, PARTICLE_COUNT); break;
+        case 'm\u00f6biusstrip':
+        case 'mobiusstrip':
+        case 'mobius': p = mobius(i, PARTICLE_COUNT); break;
+        case 'cone': p = cone(i, PARTICLE_COUNT); break;
+        case 'starburst': p = starburst(i, PARTICLE_COUNT); break;
+        case 'barchart': p = barchart(i, PARTICLE_COUNT); break;
+        case 'beziercurve':
+        case 'bezier': p = bezier(i, PARTICLE_COUNT); break;
+        case 'layers': p = layers(i, PARTICLE_COUNT); break;
+        case 'network': p = network(i, PARTICLE_COUNT); break;
+        case 'rings': p = rings(i, PARTICLE_COUNT); break;
         default: p = { x: (Math.random() - 0.5) * 90, y: (Math.random() - 0.5) * 90, z: (Math.random() - 0.5) * 90 };
       }
       targetPoints[i3] = p.x;
