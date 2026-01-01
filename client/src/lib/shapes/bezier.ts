@@ -1,25 +1,23 @@
 export const bezier = (i: number, count: number) => {
   const t = i / count;
-  const p0 = { x: -60, y: -40, z: 0 };
-  const p1 = { x: -20, y: 80, z: 40 };
-  const p2 = { x: 20, y: -80, z: -40 };
-  const p3 = { x: 60, y: 40, z: 0 };
+  // Define control points for a more dramatic S-curve
+  const p0 = { x: -80, y: -40, z: -20 };
+  const p1 = { x: -40, y: 120, z: 60 };
+  const p2 = { x: 40, y: -120, z: -60 };
+  const p3 = { x: 80, y: 40, z: 20 };
   
-  const cx = 3 * (p1.x - p0.x);
-  const bx = 3 * (p2.x - p1.x) - cx;
-  const ax = p3.x - p0.x - cx - bx;
+  const it = 1 - t;
+  const x = it*it*it*p0.x + 3*it*it*t*p1.x + 3*it*t*t*p2.x + t*t*t*p3.x;
+  const y = it*it*it*p0.y + 3*it*it*t*p1.y + 3*it*t*t*p2.y + t*t*t*p3.y;
+  const z = it*it*it*p0.z + 3*it*it*t*p1.z + 3*it*t*t*p2.z + t*t*t*p3.z;
   
-  const cy = 3 * (p1.y - p0.y);
-  const by = 3 * (p2.y - p1.y) - cy;
-  const ay = p3.y - p0.y - cy - by;
-  
-  const cz = 3 * (p1.z - p0.z);
-  const bz = 3 * (p2.z - p1.z) - cz;
-  const az = p3.z - p0.z - cz - bz;
+  // Add some volume around the curve
+  const angle = Math.random() * Math.PI * 2;
+  const r = 2 + Math.random() * 3;
   
   return {
-    x: ax * Math.pow(t, 3) + bx * Math.pow(t, 2) + cx * t + p0.x,
-    y: ay * Math.pow(t, 3) + by * Math.pow(t, 2) + cy * t + p0.y,
-    z: az * Math.pow(t, 3) + bz * Math.pow(t, 2) + cz * t + p0.z
+    x: x + Math.cos(angle) * r,
+    y: y + Math.sin(angle) * r,
+    z: z + (Math.random() - 0.5) * 2
   };
 };

@@ -22,6 +22,7 @@ import { bezier } from "../lib/shapes/bezier";
 import { layers } from "../lib/shapes/layers";
 import { network } from "../lib/shapes/network";
 import { rings } from "../lib/shapes/rings";
+import { wave } from "../lib/shapes/wave";
 
 interface ParticleViewerProps {
   mode: string;
@@ -97,7 +98,6 @@ export function ParticleViewer({ mode, customImageData }: ParticleViewerProps) {
         case 'nebula': p = nebula(i, PARTICLE_COUNT); break;
         case 'octahedron': p = octahedron(i, PARTICLE_COUNT); break;
         case 'icosahedron': p = icosahedron(i, PARTICLE_COUNT); break;
-        case 'm\u00f6biusstrip':
         case 'mobiusstrip':
         case 'mobius': p = mobius(i, PARTICLE_COUNT); break;
         case 'cone': p = cone(i, PARTICLE_COUNT); break;
@@ -108,6 +108,7 @@ export function ParticleViewer({ mode, customImageData }: ParticleViewerProps) {
         case 'layers': p = layers(i, PARTICLE_COUNT); break;
         case 'network': p = network(i, PARTICLE_COUNT); break;
         case 'rings': p = rings(i, PARTICLE_COUNT); break;
+        case 'wave': p = wave(i, PARTICLE_COUNT); break;
         default: p = { x: (Math.random() - 0.5) * 90, y: (Math.random() - 0.5) * 90, z: (Math.random() - 0.5) * 90 };
       }
       targetPoints[i3] = p.x;
