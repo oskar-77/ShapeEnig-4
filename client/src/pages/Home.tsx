@@ -269,6 +269,119 @@ export default function Home() {
         customImageData={customImage} 
       />
 
+      {/* Floating Description Card - Independent of side panels */}
+      <AnimatePresence>
+        {getCurrentShapeDescription() && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, x: "-50%", y: "-50%", left: "50%", top: "50%" }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            drag
+            dragMomentum={false}
+            style={{ 
+              width: panelSize.width, 
+              height: panelSize.height,
+              position: "fixed",
+              zIndex: 100,
+              pointerEvents: "auto"
+            }}
+            className="cursor-move shadow-2xl"
+          >
+            <GlassCard className="flex flex-col h-full overflow-hidden w-full border-primary/40 backdrop-blur-2xl">
+              <div className="flex items-center justify-between mb-3 flex-shrink-0 p-4 border-b border-white/10">
+                <h3 className="text-sm font-bold text-primary uppercase tracking-wider select-none">Information</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const shapeId = activeMode === 'custom' && activeTemplateId ? `template-${activeTemplateId}` : activeMode;
+                      const template = activeTemplateId ? templates.find(t => t.id === activeTemplateId) : null;
+                      openEditDialog(shapeId, template?.name);
+                    }}
+                    className="p-1.5 rounded hover:bg-primary/20 text-primary/60 hover:text-primary transition-colors cursor-pointer"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <ScrollArea className="flex-1 cursor-default p-4">
+                <div 
+                  className="prose prose-invert prose-sm max-w-none text-xs text-muted-foreground"
+                  dangerouslySetInnerHTML={{ __html: getCurrentShapeDescription()?.description || '' }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                />
+              </ScrollArea>
+              {/* Resize Handles */}
+              <div 
+                className="absolute bottom-0 right-0 w-8 h-8 cursor-nwse-resize flex items-center justify-center z-50 group"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const startWidth = panelSize.width;
+                  const startHeight = panelSize.height;
+                  const startX = e.clientX;
+                  const startY = e.clientY;
+
+                  const onMouseMove = (moveEvent: MouseEvent) => {
+                    setPanelSize({
+                      width: Math.max(250, startWidth + (moveEvent.clientX - startX)),
+                      height: Math.max(200, startHeight + (moveEvent.clientY - startY)),
+                    });
+                  };
+
+                  const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                  };
+
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                }}
+              >
+                <div className="w-3 h-3 border-r-2 border-b-2 border-primary/40 group-hover:border-primary transition-colors" />
+              </div>
+              {/* Bottom Edge Resize (Vertical Only) */}
+              <div 
+                className="absolute bottom-0 left-0 right-8 h-2 cursor-ns-resize hover:bg-primary/10 transition-colors"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const startHeight = panelSize.height;
+                  const startY = e.clientY;
+                  const onMouseMove = (moveEvent: MouseEvent) => {
+                    setPanelSize(prev => ({ ...prev, height: Math.max(200, startHeight + (moveEvent.clientY - startY)) }));
+                  };
+                  const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                  };
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                }}
+              />
+              {/* Right Edge Resize (Horizontal Only) */}
+              <div 
+                className="absolute top-0 right-0 bottom-8 w-2 cursor-ew-resize hover:bg-primary/10 transition-colors"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  const startWidth = panelSize.width;
+                  const startX = e.clientX;
+                  const onMouseMove = (moveEvent: MouseEvent) => {
+                    setPanelSize(prev => ({ ...prev, width: Math.max(250, startWidth + (moveEvent.clientX - startX)) }));
+                  };
+                  const onMouseUp = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                  };
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                }}
+              />
+            </GlassCard>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* UI Overlay */}
       <div className="absolute inset-0 z-10 pointer-events-none p-4 md:p-8 flex justify-between items-start h-full overflow-hidden">
         
@@ -305,76 +418,6 @@ export default function Home() {
                     </div>
                   </div>
                 </GlassCard>
-
-                {/* Description Card - Draggable and Resizable */}
-                {getCurrentShapeDescription() && (
-                  <motion.div
-                    drag
-                    dragMomentum={false}
-                    dragConstraints={{ left: 0, right: window.innerWidth - panelSize.width, top: 0, bottom: window.innerHeight - panelSize.height }}
-                    style={{ 
-                      width: panelSize.width, 
-                      height: panelSize.height,
-                      resize: 'both',
-                      overflow: 'hidden',
-                      zIndex: 100
-                    }}
-                    className="pointer-events-auto cursor-move relative shadow-2xl"
-                  >
-                    <GlassCard className="flex flex-col h-full overflow-hidden w-full border-primary/40">
-                      <div className="flex items-center justify-between mb-3 flex-shrink-0">
-                        <h3 className="text-sm font-bold text-primary uppercase tracking-wider select-none">Information</h3>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => {
-                              const shapeId = activeMode === 'custom' && activeTemplateId ? `template-${activeTemplateId}` : activeMode;
-                              const template = activeTemplateId ? templates.find(t => t.id === activeTemplateId) : null;
-                              openEditDialog(shapeId, template?.name);
-                            }}
-                            className="p-1.5 rounded hover:bg-primary/20 text-primary/60 hover:text-primary transition-colors cursor-pointer"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <ScrollArea className="flex-1 cursor-default">
-                        <div 
-                          className="prose prose-invert prose-sm max-w-none text-xs text-muted-foreground p-1"
-                          dangerouslySetInnerHTML={{ __html: getCurrentShapeDescription()?.description || '' }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                        />
-                      </ScrollArea>
-                      {/* Resize Handle Placeholder */}
-                      <div 
-                        className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize bg-primary/20 rounded-tl-lg flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity z-50"
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          const startWidth = panelSize.width;
-                          const startHeight = panelSize.height;
-                          const startX = e.clientX;
-                          const startY = e.clientY;
-
-                          const onMouseMove = (moveEvent: MouseEvent) => {
-                            setPanelSize({
-                              width: Math.max(200, startWidth + (moveEvent.clientX - startX)),
-                              height: Math.max(200, startHeight + (moveEvent.clientY - startY)),
-                            });
-                          };
-
-                          const onMouseUp = () => {
-                            document.removeEventListener('mousemove', onMouseMove);
-                            document.removeEventListener('mouseup', onMouseUp);
-                          };
-
-                          document.addEventListener('mousemove', onMouseMove);
-                          document.addEventListener('mouseup', onMouseUp);
-                        }}
-                      >
-                        <div className="w-2 h-2 border-r-2 border-b-2 border-primary/60 rotate-45" />
-                      </div>
-                    </GlassCard>
-                  </motion.div>
-                )}
               </motion.div>
             )}
           </AnimatePresence>
