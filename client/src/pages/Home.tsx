@@ -174,9 +174,11 @@ export default function Home() {
   const [activeTemplateId, setActiveTemplateId] = useState<number | null>(null);
   const [editingShape, setEditingShape] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
-  
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(true);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(true);
+  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
+  const [panelSize, setPanelSize] = useState({ width: 320, height: 400 });
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -271,7 +273,11 @@ export default function Home() {
       <div className="absolute inset-0 z-10 pointer-events-none p-4 md:p-8 flex justify-between items-start h-full overflow-hidden">
         
         {/* Left Panel: Info */}
-        <div className="flex items-start h-full">
+        <div 
+          className="flex items-start h-full group/left"
+          onMouseEnter={() => setLeftPanelCollapsed(false)}
+          onMouseLeave={() => setLeftPanelCollapsed(true)}
+        >
           <AnimatePresence initial={false}>
             {!leftPanelCollapsed && (
               <motion.div 
@@ -302,49 +308,94 @@ export default function Home() {
                   </div>
                 </GlassCard>
 
-                {/* Description Card */}
+                {/* Description Card - Draggable and Resizable */}
                 {getCurrentShapeDescription() && (
-                  <GlassCard className="flex flex-col flex-1 overflow-hidden">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-primary uppercase tracking-wider">Information</h3>
-                      <button
-                        onClick={() => {
-                          const shapeId = activeMode === 'custom' && activeTemplateId ? `template-${activeTemplateId}` : activeMode;
-                          const template = activeTemplateId ? templates.find(t => t.id === activeTemplateId) : null;
-                          openEditDialog(shapeId, template?.name);
-                        }}
-                        className="p-1.5 rounded hover:bg-primary/20 text-primary/60 hover:text-primary transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <ScrollArea className="flex-1">
+                  <motion.div
+                    drag
+                    dragMomentum={false}
+                    onDragEnd={(_, info) => {
+                      setPanelPosition(prev => ({
+                        x: prev.x + info.offset.x,
+                        y: prev.y + info.offset.y
+                      }));
+                    }}
+                    style={{ 
+                      width: panelSize.width, 
+                      height: panelSize.height,
+                      resize: 'both',
+                      overflow: 'hidden'
+                    }}
+                    className="pointer-events-auto cursor-move relative"
+                  >
+                    <GlassCard className="flex flex-col h-full overflow-hidden w-full">
+                      <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                        <h3 className="text-sm font-bold text-primary uppercase tracking-wider select-none">Information</h3>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              const shapeId = activeMode === 'custom' && activeTemplateId ? `template-${activeTemplateId}` : activeMode;
+                              const template = activeTemplateId ? templates.find(t => t.id === activeTemplateId) : null;
+                              openEditDialog(shapeId, template?.name);
+                            }}
+                            className="p-1.5 rounded hover:bg-primary/20 text-primary/60 hover:text-primary transition-colors cursor-pointer"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <ScrollArea className="flex-1 cursor-default">
+                        <div 
+                          className="prose prose-invert prose-sm max-w-none text-xs text-muted-foreground p-1"
+                          dangerouslySetInnerHTML={{ __html: getCurrentShapeDescription()?.description || '' }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        />
+                      </ScrollArea>
+                      {/* Resize Handle Placeholder */}
                       <div 
-                        className="prose prose-invert prose-sm max-w-none text-xs text-muted-foreground"
-                        dangerouslySetInnerHTML={{ __html: getCurrentShapeDescription()?.description || '' }}
+                        className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize bg-primary/20 rounded-tl-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          const startWidth = panelSize.width;
+                          const startHeight = panelSize.height;
+                          const startX = e.clientX;
+                          const startY = e.clientY;
+
+                          const onMouseMove = (moveEvent: MouseEvent) => {
+                            setPanelSize({
+                              width: Math.max(200, startWidth + (moveEvent.clientX - startX)),
+                              height: Math.max(200, startHeight + (moveEvent.clientY - startY)),
+                            });
+                          };
+
+                          const onMouseUp = () => {
+                            document.removeEventListener('mousemove', onMouseMove);
+                            document.removeEventListener('mouseup', onMouseUp);
+                          };
+
+                          document.addEventListener('mousemove', onMouseMove);
+                          document.addEventListener('mouseup', onMouseUp);
+                        }}
                       />
-                    </ScrollArea>
-                  </GlassCard>
+                    </GlassCard>
+                  </motion.div>
                 )}
               </motion.div>
             )}
           </AnimatePresence>
-          <button
-            onClick={() => setLeftPanelCollapsed(!leftPanelCollapsed)}
-            className="pointer-events-auto p-2 bg-black/40 border border-white/10 rounded-r-lg hover:bg-primary/20 transition-colors mt-4 h-12 flex items-center justify-center backdrop-blur-md"
-          >
+          <div className="pointer-events-auto p-2 bg-black/40 border border-white/10 rounded-r-lg hover:bg-primary/20 transition-colors mt-4 h-12 flex items-center justify-center backdrop-blur-md opacity-50 group-hover/left:opacity-100">
             {leftPanelCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-          </button>
+          </div>
         </div>
 
         {/* Right Panel: Controls */}
-        <div className="flex items-start h-full">
-          <button
-            onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
-            className="pointer-events-auto p-2 bg-black/40 border border-white/10 rounded-l-lg hover:bg-primary/20 transition-colors mt-4 h-12 flex items-center justify-center backdrop-blur-md"
-          >
+        <div 
+          className="flex items-start h-full group/right"
+          onMouseEnter={() => setRightPanelCollapsed(false)}
+          onMouseLeave={() => setRightPanelCollapsed(true)}
+        >
+          <div className="pointer-events-auto p-2 bg-black/40 border border-white/10 rounded-l-lg hover:bg-primary/20 transition-colors mt-4 h-12 flex items-center justify-center backdrop-blur-md opacity-50 group-hover/right:opacity-100">
             {rightPanelCollapsed ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-          </button>
+          </div>
           <AnimatePresence initial={false}>
             {!rightPanelCollapsed && (
               <motion.div 
