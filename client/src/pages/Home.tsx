@@ -174,7 +174,7 @@ export default function Home() {
   const [activeTemplateId, setActiveTemplateId] = useState<number | null>(null);
   const [editingShape, setEditingShape] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(true);
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(true);
   const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
   const [panelSize, setPanelSize] = useState({ width: 320, height: 400 });
@@ -274,9 +274,7 @@ export default function Home() {
         
         {/* Left Panel: Info */}
         <div 
-          className="flex items-start h-full group/left"
-          onMouseEnter={() => setLeftPanelCollapsed(false)}
-          onMouseLeave={() => setLeftPanelCollapsed(true)}
+          className="flex items-start h-full"
         >
           <AnimatePresence initial={false}>
             {!leftPanelCollapsed && (
@@ -313,21 +311,17 @@ export default function Home() {
                   <motion.div
                     drag
                     dragMomentum={false}
-                    onDragEnd={(_, info) => {
-                      setPanelPosition(prev => ({
-                        x: prev.x + info.offset.x,
-                        y: prev.y + info.offset.y
-                      }));
-                    }}
+                    dragConstraints={{ left: 0, right: window.innerWidth - panelSize.width, top: 0, bottom: window.innerHeight - panelSize.height }}
                     style={{ 
                       width: panelSize.width, 
                       height: panelSize.height,
                       resize: 'both',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      zIndex: 100
                     }}
-                    className="pointer-events-auto cursor-move relative"
+                    className="pointer-events-auto cursor-move relative shadow-2xl"
                   >
-                    <GlassCard className="flex flex-col h-full overflow-hidden w-full">
+                    <GlassCard className="flex flex-col h-full overflow-hidden w-full border-primary/40">
                       <div className="flex items-center justify-between mb-3 flex-shrink-0">
                         <h3 className="text-sm font-bold text-primary uppercase tracking-wider select-none">Information</h3>
                         <div className="flex items-center gap-2">
@@ -352,7 +346,7 @@ export default function Home() {
                       </ScrollArea>
                       {/* Resize Handle Placeholder */}
                       <div 
-                        className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize bg-primary/20 rounded-tl-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                        className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize bg-primary/20 rounded-tl-lg flex items-center justify-center opacity-50 hover:opacity-100 transition-opacity z-50"
                         onMouseDown={(e) => {
                           e.stopPropagation();
                           const startWidth = panelSize.width;
@@ -375,16 +369,21 @@ export default function Home() {
                           document.addEventListener('mousemove', onMouseMove);
                           document.addEventListener('mouseup', onMouseUp);
                         }}
-                      />
+                      >
+                        <div className="w-2 h-2 border-r-2 border-b-2 border-primary/60 rotate-45" />
+                      </div>
                     </GlassCard>
                   </motion.div>
                 )}
               </motion.div>
             )}
           </AnimatePresence>
-          <div className="pointer-events-auto p-2 bg-black/40 border border-white/10 rounded-r-lg hover:bg-primary/20 transition-colors mt-4 h-12 flex items-center justify-center backdrop-blur-md opacity-50 group-hover/left:opacity-100">
+          <button
+            onClick={() => setLeftPanelCollapsed(!leftPanelCollapsed)}
+            className="pointer-events-auto p-2 bg-black/40 border border-white/10 rounded-r-lg hover:bg-primary/20 transition-colors mt-4 h-12 flex items-center justify-center backdrop-blur-md"
+          >
             {leftPanelCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-          </div>
+          </button>
         </div>
 
         {/* Right Panel: Controls */}
